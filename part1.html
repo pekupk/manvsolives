@@ -36,6 +36,9 @@ function preload() {
 	game.load.spritesheet('waters', 'assets/waters.png', 32, 400, 32);
 
 	game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
+
+	game.load.spritesheet('baddie2', 'assets/olive_black.png', 32, 32);
+
 	game.load.spritesheet('possu', 'assets/possu2.png', 32, 24);
 
 	game.load.spritesheet('dude','assets/dude.png', 32, 48)
@@ -89,6 +92,9 @@ var water;
 var possu;
 
 
+var level=1;
+
+
 var possuOnTrue=false;
 var clothesOffTimer=-1;
 var noCursorTimer=-1;
@@ -117,9 +123,6 @@ function create() {
     water.animations.play('waves' + n, 8, true);
 
 	game.physics.startSystem(Phaser.Physics.ARCADE);
-
-	
-	//game.add.sprite(0,0,'sky');
 	
 	game.stage.backgroundColor = '#0099FF';
 
@@ -148,7 +151,7 @@ function create() {
 	blocks=game.add.group();
 	blocks.enableBody = true;
 
-	// Initializa ground
+	// Build platforms.
 	var ground=platforms.create(0, game.world.height - 64, 'green_ground');
 	
 	ground.scale.setTo(2,2);
@@ -160,10 +163,10 @@ function create() {
 	ledge=platforms.create(-100, 420, 'ground');
 	ledge.body.immovable=true;
 	
-	ledge=platforms.create(585, 250, 'ground');
+	ledge=platforms.create(585, 260, 'ground');
 	ledge.body.immovable=true;
 	
-	ledge=platforms.create(-185, 250, 'ground');
+	ledge=platforms.create(-185, 260, 'ground');
 	ledge.body.immovable=true;
 	
 	ledge=platforms.create(200, 100, 'ground');
@@ -176,7 +179,7 @@ function create() {
 	ledge.body.immovable=true;
 
 	// first init player
-	player=game.add.sprite(game.world.width*0.5-19, game.world.height*0.5-200, 'dude');
+	player=game.add.sprite(game.world.width*0.5-19, game.world.height*0.5-150, 'dude');
 
 	noCursorTimer=100;
 
@@ -198,10 +201,10 @@ function create() {
 	baddies.enableBody = true;
 
 	//Init blocks
-	var block=blocks.create(0, 220, 'block');
+	var block=blocks.create(0, 230, 'block');
 	block.body.immovable = true;
 
-	var block=blocks.create(game.world.width-32, 220, 'block');
+	var block=blocks.create(game.world.width-32, 230, 'block');
 	block.body.immovable = true;
 
 	var block=blocks.create(0, 390, 'block');
@@ -263,6 +266,7 @@ function update() {
 
 		dieTimer=-1;
 
+
 	}
 
 
@@ -279,7 +283,6 @@ function update() {
 	game.physics.arcade.collide(baddies, blocks, collideBlock, null, this);
 
 	//game.physics.arcade.collide(baddies, baddies);
-
 
 	// Money and diamonds
 	game.physics.arcade.overlap(player, stars, collectStar, null, this);
@@ -319,7 +322,8 @@ function update() {
 	game.physics.arcade.collide(player, platforms);
 	game.physics.arcade.collide(player, blocks);
 
-	
+	game.physics.arcade.collide(stars, stars);
+
 	//  Finally, reset the players velocity (movement)
     player.body.velocity.x = 0;
 
@@ -414,6 +418,8 @@ function cleanup() {
 		
 	dyingFromOlive=false;
 
+	level=1;
+
 
 }
 
@@ -480,7 +486,7 @@ function luoPossu(a, b) {
 function resetPlayer() {
 
 	player.body.x=game.world.width*0.5-19;
-	player.body.y=game.world.height*0.5-200;
+	player.body.y=game.world.height*0.5-150;
 
 	player.loadTexture('dude')
 
@@ -497,6 +503,8 @@ function resetPlayer() {
 
 function checkPlayerDie(player, olive) {
 
+	// TODO: check the kind of olive enemy.
+
 	var criteria1=(player.body.touching.up);
 
 	var playerX=player.body.x;
@@ -504,7 +512,7 @@ function checkPlayerDie(player, olive) {
 
 	var difference=game.math.difference(playerX, oliveX)
 
-	if (criteria1 && difference < 40) {
+	if (criteria1 && difference < 30) {
 
 		dyingFromOlive=true;
 
@@ -536,10 +544,9 @@ function dieFromGreenOlive(olive) {
 	extraOlive.animations.play('left');
 
 	// In case user has no clothes.
-	clotherOffTimer=-1;
+	clothesOffTimer=-1;
 
 	dieTimer=120;
-
 }
 
 
@@ -652,10 +659,11 @@ function collectDiamond(player, diamond) {
     	star.body.gravity.y = 300;
 		star.body.velocity.x = 0;
 		star.body.bounce.y = 0.4;
+
 	}
 
 	//  Add and update the score
-    score += 100;
+    score += 100 * level;
     scoreText.text = 'Coins: ' + score;
 }
 
@@ -665,19 +673,21 @@ function collectStar(player, star) {
 	coin.play();
 
 	//  Add and update the score
-    score += 10;
+    score += 10 * level;
     scoreText.text = 'Coins: ' + score;
 
 
 	if (diamondCounter==3) {
+		
 		appearDiamonds();
+		level += 1;
+
 	}
 }
 
 function createBaddiesAndCoins() {
 
 if (baddieCounter == 240) {
-	
 
 		baddieCounter = 0;
 		
@@ -717,34 +727,43 @@ if (baddieCounter == 240) {
 
 		if (baddieLeft === true) {
 
-			baddie = baddies.create(game.world.width*0.5-32+50, -32, 'baddie');
-
-			baddie.body.velocity.x = 60;
-
-			baddie.body.bounce.y=0.2;
+			if (level==1) {
+				baddie = baddies.create(game.world.width*0.5-32+50, -32, 'baddie');
+				baddie.animations.add('right', [0, 1], 1, true);
+				baddie.animations.add('left', [2, 3], 1, true);
+				baddie.body.velocity.x = 60;
+			} else {
+				baddie = baddies.create(game.world.width*0.5-32+50, -32, 'baddie2');
+				baddie.animations.add('right', [0, 1], 6, true);
+				baddie.animations.add('left', [3, 4], 6, true);
+				baddie.body.velocity.x = 80;
+			}
+			
+			baddie.body.bounce.y=0.3;
 			baddie.body.gravity.y=300;
 			
-			
 			baddie.scale.setTo(1.5,1.5);
-			
-			baddie.animations.add('right', [0, 1], 1, true);
-			baddie.animations.add('left', [2, 3], 1, true);
 			
 			baddie.animations.play('right');
 
 		} else {
 
-			baddie = baddies.create(game.world.width*0.5-32-50, -32, 'baddie');
+			if (level==1) {
+				baddie = baddies.create(game.world.width*0.5-32-50, -32, 'baddie');
+				baddie.animations.add('right', [0, 1], 1, true);
+				baddie.animations.add('left', [2, 3], 1, true);
+				baddie.body.velocity.x = -60;
+			} else {
+				baddie = baddies.create(game.world.width*0.5-32-50, -32, 'baddie2');
+				baddie.animations.add('right', [0, 1], 6, true);
+				baddie.animations.add('left', [3, 4], 6, true);
+				baddie.body.velocity.x = -80;
+			}
 
-			baddie.body.velocity.x = -60;
-
-			baddie.body.bounce.y=0.2;
+			baddie.body.bounce.y=0.3;
 			baddie.body.gravity.y=300;
 		
 			baddie.scale.setTo(1.5,1.5);
-
-			baddie.animations.add('right', [0, 1], 1, true);
-			baddie.animations.add('left', [2, 3], 1, true);
 			
 			baddie.animations.play('left');
 

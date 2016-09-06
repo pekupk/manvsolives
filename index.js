@@ -15,7 +15,6 @@ server.register([Vision, Inert], (err) => {
         },
 		path: Path.join(__dirname,'.')
   	});
-
 	/*server.views({
 
 		engines: {
