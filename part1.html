@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head> 
 	<meta charset="UTF-8" />
-	<title>Phaser - Making your first game, part 1</title>
+	<title>Man vs. Olives (Homem contra aceitonas)</title>
 	<script type="text/javascript" src="/js/phaser.min.js"></script>
 	
     <style type="text/css">
@@ -10,6 +10,7 @@
             margin: 0;
         }
     </style>
+
 </head>
 <body>
 
@@ -17,9 +18,10 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {
-preload: preload, create: create, update: update });
 
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {
+	preload: preload, create: create, update: update
+});
 
 function preload() {
 
@@ -29,21 +31,22 @@ function preload() {
 	game.load.image('star', 'assets/star.png');
 
 	game.load.image('diamond', 'assets/diamond.png');
-
 	game.load.image('green_ground', 'assets/green_platform.png');
 
 
-	game.load.spritesheet('waters', 'assets/waters.png', 32, 400, 32);
 
+
+	game.load.spritesheet('waters', 'assets/waters.png', 32, 400, 32);
 	game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
 
 	game.load.spritesheet('baddie2', 'assets/olive_black.png', 32, 32);
-
 	game.load.spritesheet('possu', 'assets/possu2.png', 32, 24);
 
+	game.load.spritesheet('avain', 'assets/avain.png', 32, 32);
+
 	game.load.spritesheet('dude','assets/dude.png', 32, 48)
-	
 	game.load.spritesheet('dude_naked','assets/dude_naked.png', 32, 48)
+
 
 	game.load.audio('coin', 'assets/coin.mp3');
 	game.load.audio('monster', 'assets/monster.mp3');
@@ -64,23 +67,23 @@ var extraOlive;
 
 var cursors;
 var diamonds;
+var avaimet;
+
+
 
 var diamondCounter=0;
-
 var stars;
 
 var baddies;
 var baddieCounter=0;
 
 var baddieLeft=true;
-
 var numberOfBaddies=0;
 
 var score=0;
 var scoreText;
 
 var counter=0;
-
 var possuCounter=0;
 
 var coin;
@@ -91,9 +94,7 @@ var music;
 var water;
 var possu;
 
-
 var level=1;
-
 
 var possuOnTrue=false;
 var clothesOffTimer=-1;
@@ -101,6 +102,7 @@ var noCursorTimer=-1;
 var dyingFromOlive=false;
 
 var dieTimer=-1;
+
 
 
 function create() {
@@ -113,6 +115,7 @@ function create() {
     water.animations.add('waves1', [4, 5, 6, 7, 6, 5]);
     water.animations.add('waves2', [8, 9, 10, 11, 10, 9]);
     water.animations.add('waves3', [12, 13, 14, 15, 14, 13]);
+
     water.animations.add('waves4', [16, 17, 18, 19, 18, 17]);
     water.animations.add('waves5', [20, 21, 22, 23, 22, 21]);
     water.animations.add('waves6', [24, 25, 26, 27, 26, 25]);
@@ -178,6 +181,7 @@ function create() {
 	ledge=green_ground.create(game.world.width*0.5, game.world.height-88, 'green_ground');
 	ledge.body.immovable=true;
 
+
 	// first init player
 	player=game.add.sprite(game.world.width*0.5-19, game.world.height*0.5-150, 'dude');
 
@@ -199,6 +203,11 @@ function create() {
 	// Baddies olives group.
 	baddies=game.add.group();
 	baddies.enableBody = true;
+
+	// Keys group
+	avaimet=game.add.group();
+	avaimet.enableBody = true;
+
 
 	//Init blocks
 	var block=blocks.create(0, 230, 'block');
@@ -225,6 +234,7 @@ function create() {
 
 	cursors=game.input.keyboard.createCursorKeys();
 
+
 	diamonds=game.add.group();
 	diamonds.enableBody = true;
 
@@ -241,6 +251,15 @@ function create() {
 }
 
 function update() {
+
+	// for testing
+
+	if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+
+		luoAvain();
+	}
+	// game loop
+
 
 	if (clothesOffTimer>0) {
 
@@ -263,12 +282,8 @@ function update() {
 		cleanup();
 
 		resetPlayer();
-
 		dieTimer=-1;
-
-
 	}
-
 
 	// Increment counter for baddie timer.
 	baddieCounter += 1;
@@ -277,7 +292,6 @@ function update() {
 	createBaddiesAndCoins();
 
 	// Collitions
-	
 	// baddies collitions
 	game.physics.arcade.collide(baddies, platforms);
 	game.physics.arcade.collide(baddies, blocks, collideBlock, null, this);
@@ -299,7 +313,6 @@ function update() {
 
 	// Pork collitions
 	game.physics.arcade.overlap(green_ground, baddies, luoPossu, null, this);
-	//game.physics.arcade.overlap(green_ground, player, luoPossu, null, this);
 
 	if (possuOnTrue) {
 
@@ -309,6 +322,7 @@ function update() {
 	}
 
 	game.physics.arcade.collide(possu, platforms);
+
 
 
 	// Player, platforms and enemies.
@@ -322,7 +336,12 @@ function update() {
 	game.physics.arcade.collide(player, platforms);
 	game.physics.arcade.collide(player, blocks);
 
+	// coins and keys
 	game.physics.arcade.collide(stars, stars);
+
+	game.physics.arcade.overlap(player, avaimet, collectKey, null, this);
+
+	game.physics.arcade.collide(avaimet, blocks);
 
 	//  Finally, reset the players velocity (movement)
     player.body.velocity.x = 0;
@@ -480,6 +499,7 @@ function luoPossu(a, b) {
 	possu.animations.play('run');
 
 }
+
 
 // Player dies reset
 
@@ -654,11 +674,8 @@ function collectDiamond(player, diamond) {
 	diamondCounter++;
 
 	if (diamondCounter==3) {
-		var star = stars.create(game.world.width*0.5-12, game.world.height-300, 'star');
-
-    	star.body.gravity.y = 300;
-		star.body.velocity.x = 0;
-		star.body.bounce.y = 0.4;
+		
+		luoAvain();
 
 	}
 
@@ -676,18 +693,37 @@ function collectStar(player, star) {
     score += 10 * level;
     scoreText.text = 'Coins: ' + score;
 
+}
 
-	if (diamondCounter==3) {
-		
-		appearDiamonds();
-		level += 1;
+function collectKey(player, key) {
 
-	}
+	key.kill();
+
+	appearDiamonds();
+	level+=1;
+
+}
+
+function luoAvain()
+{
+
+	var avain = avaimet.create(game.world.width*0.5-15, game.world.height-300, 'avain');
+
+	game.physics.arcade.enable(avain);
+
+    avain.body.gravity.y = 300;
+	avain.body.velocity.x = 0;
+	avain.body.bounce.y = 0.6;
+
+	avain.animations.add('shine', [0, 1, 2, 3], 3, true);
+
+	avain.animations.play('shine');
+
 }
 
 function createBaddiesAndCoins() {
 
-if (baddieCounter == 240) {
+	if (baddieCounter == 240) {
 
 		baddieCounter = 0;
 		
@@ -764,7 +800,7 @@ if (baddieCounter == 240) {
 			baddie.body.gravity.y=300;
 		
 			baddie.scale.setTo(1.5,1.5);
-			
+
 			baddie.animations.play('left');
 
 		}
