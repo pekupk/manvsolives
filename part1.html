@@ -31,9 +31,10 @@ function preload() {
 	game.load.image('star', 'assets/star.png');
 
 	game.load.image('diamond', 'assets/diamond.png');
+	game.load.image('red_diamond', 'assets/diamond_red.png');
+
+
 	game.load.image('green_ground', 'assets/green_platform.png');
-
-
 
 
 	game.load.spritesheet('waters', 'assets/waters.png', 32, 400, 32);
@@ -46,7 +47,6 @@ function preload() {
 
 	game.load.spritesheet('dude','assets/dude.png', 32, 48)
 	game.load.spritesheet('dude_naked','assets/dude_naked.png', 32, 48)
-
 
 	game.load.audio('coin', 'assets/coin.mp3');
 	game.load.audio('monster', 'assets/monster.mp3');
@@ -68,7 +68,6 @@ var extraOlive;
 var cursors;
 var diamonds;
 var avaimet;
-
 
 
 var diamondCounter=0;
@@ -239,6 +238,7 @@ function create() {
 	diamonds.enableBody = true;
 
 	appearDiamonds();
+
 
 	//
 
@@ -433,33 +433,49 @@ function cleanup() {
 		entry.kill();
 	});
 
-	appearDiamonds();
-		
-	dyingFromOlive=false;
+	avaimet.children.forEach(function(entry) {
+		entry.kill();
+	});
 
 	level=1;
 
+	appearDiamonds();
+		
+	dyingFromOlive=false;
 
 }
 
 // Reset diamonds
 function appearDiamonds() {
 
-	var diamond=diamonds.create(game.world.width*0.5-16, 50, 'diamond');
+	var diamondName;
+
+	if (level>1) {
+
+		diamondName='red_diamond';
+
+	} else {
+
+		diamondName='diamond';
+
+	}
+
+
+	var diamond=diamonds.create(game.world.width*0.5-16, 50, diamondName);
 
 	game.physics.arcade.enable(diamond);
 	
 	diamond.body.bounce.y=0.8;
 	diamond.body.gravity.y=300;
 
-	diamond=diamonds.create(game.world.width*0.38-16, game.world.height-400, 'diamond');
+	diamond=diamonds.create(game.world.width*0.38-16, game.world.height-400, diamondName);
 
 	game.physics.arcade.enable(diamond);
 	
 	diamond.body.bounce.y=0.8;
 	diamond.body.gravity.y=300;
 
-	diamond=diamonds.create(game.world.width*0.62-16, game.world.height-400, 'diamond');
+	diamond=diamonds.create(game.world.width*0.62-16, game.world.height-400, diamondName);
 
 	game.physics.arcade.enable(diamond);
 	
@@ -699,8 +715,9 @@ function collectKey(player, key) {
 
 	key.kill();
 
-	appearDiamonds();
 	level+=1;
+
+	appearDiamonds();
 
 }
 
