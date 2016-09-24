@@ -76,6 +76,8 @@ var stars;
 var baddies;
 var baddieCounter=0;
 
+var props;
+
 var baddieLeft=true;
 var numberOfBaddies=0;
 
@@ -101,6 +103,8 @@ var noCursorTimer=-1;
 var dyingFromOlive=false;
 
 var dieTimer=-1;
+
+
 
 
 
@@ -152,6 +156,7 @@ function create() {
 
 	blocks=game.add.group();
 	blocks.enableBody = true;
+
 
 	// Build platforms.
 	var ground=platforms.create(0, game.world.height - 64, 'green_ground');
@@ -238,6 +243,11 @@ function create() {
 	diamonds.enableBody = true;
 
 	appearDiamonds();
+
+
+	//
+
+	props=game.add.group();
 
 
 	//
@@ -437,6 +447,10 @@ function cleanup() {
 		entry.kill();
 	});
 
+	props.children.forEach(function(entry) {
+		entry.kill();
+	});
+
 	level=1;
 
 	appearDiamonds();
@@ -453,13 +467,10 @@ function appearDiamonds() {
 	if (level>1) {
 
 		diamondName='red_diamond';
-
 	} else {
 
 		diamondName='diamond';
-
 	}
-
 
 	var diamond=diamonds.create(game.world.width*0.5-16, 50, diamondName);
 
@@ -715,7 +726,17 @@ function collectKey(player, key) {
 
 	key.kill();
 
-	level+=1;
+	// put key to scoreboard.
+	if (level<4) {
+		var gottenKey=props.create(game.world.width-75+level*25, 15, 'avain');
+	} else {
+
+		//...
+
+	}
+
+
+	level++;
 
 	appearDiamonds();
 
@@ -789,7 +810,7 @@ function createBaddiesAndCoins() {
 				baddie = baddies.create(game.world.width*0.5-32+50, -32, 'baddie2');
 				baddie.animations.add('right', [0, 1], 6, true);
 				baddie.animations.add('left', [3, 4], 6, true);
-				baddie.body.velocity.x = 80;
+				baddie.body.velocity.x = 70;
 			}
 			
 			baddie.body.bounce.y=0.3;
