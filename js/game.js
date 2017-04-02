@@ -178,7 +178,7 @@ function create() {
 
     game.physics.arcade.enable(player);
 
-    player.body.bounce.y = 0.15;
+    player.body.bounce.y = 0.17;
     player.body.gravity.y = 350;
     player.body.collideWorldBounds = true;
     player.body.friction = 0;
