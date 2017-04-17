@@ -79,8 +79,6 @@ var scoreText;
 var counter = 0;
 var possuCounter = 0;
 
-var canShootFireball = 3;
-
 var coin;
 var monster;
 var step;
@@ -90,7 +88,7 @@ var music;
 var water;
 var possu;
 
-var level = 1;
+var level = 2;
 
 var possuOnTrue = false;
 var clothesOffTimer = -1;
@@ -99,6 +97,7 @@ var dyingFromOlive = false;
 
 var dieTimer = -1;
 
+var baddieId = 0;
 
 function create() {
 
@@ -372,6 +371,9 @@ function update() {
     game.physics.arcade.collide(baddies, baddies, checkBaddieDie, null, this);
     game.physics.arcade.collide(baddies, mustat_oliivit, checkBaddieDie, null, this);
 
+    game.physics.arcade.collide(baddies, fireballs, killBaddie, null, this);
+    game.physics.arcade.collide(mustat_oliivit, fireballs, killBaddie, null, this);
+
     game.physics.arcade.collide(mustat_oliivit, mustat_oliivit, blackOliveFireball, null, this);
 
     game.physics.arcade.collide(player, platforms);
@@ -531,12 +533,12 @@ function shootFireBall(enemy, dir) {
     // Don't shoot if already dying.
     if (clothesOffTimer > 0) return;
 
-    // Reduce number of bullets
-    if (canShootFireball++ < 31) {
+    // Reduce number of bullets emitted by olive
+    if (enemy.bulletLimiter++ < 31) {
         return;
     }
-    canShootFireball = 0;
 
+    enemy.bulletLimiter = 0;
 
     fire.play();
 
@@ -577,6 +579,9 @@ function shootFireBall(enemy, dir) {
 
     fireball.timeToLive = 190;
 
+    // Own fireball not kill.
+    fireball.baddieid = enemy.baddieid;
+
 }
 
 
@@ -590,8 +595,6 @@ function blackOliveFireball(player, olive) {
     // only shoot if player is left or right
 
     var direction;
-
-
 
     if (olive.animations.currentAnim.name == "left") {
 
@@ -782,6 +785,16 @@ function killStar(star, platform) {
     star.kill();
 }
 
+function killBaddie(baddie, fireball) {
+
+    // Own fireball doesn't kill.
+    if (baddie.baddieid == fireball.baddieid) { return; }
+
+    // Otherwise
+    fireball.kill();
+    baddie.kill();
+
+}
 
 function possuOut(possu) {
 
@@ -976,6 +989,10 @@ function createBaddiesAndCoins() {
             baddie.animations.play('left');
 
         }
+
+
+        baddie.bulletLimiter = 0;
+        baddie.baddieid = baddieId++;
 
         monster.play();
         baddie.body.friction.x = 0;
