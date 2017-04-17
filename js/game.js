@@ -29,10 +29,16 @@ function preload() {
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.spritesheet('dude_naked', 'assets/dude_naked.png', 32, 48);
 
+    game.load.spritesheet('body_burn', 'assets/body_burn.png', 32, 48);
+
     game.load.spritesheet('fireball_txt', 'assets/tulipallo.png', 64, 64);
 
     game.load.audio('coin', 'assets/coin.mp3');
     game.load.audio('monster', 'assets/monster.mp3');
+
+    game.load.audio('fire', 'assets/fire.m4a');
+
+    game.load.audio('music', 'assets/music.m4a');
 
     //game.load.audio('music', 'assets/vv.mp3');
 
@@ -73,15 +79,18 @@ var scoreText;
 var counter = 0;
 var possuCounter = 0;
 
+var canShootFireball = 3;
+
 var coin;
 var monster;
 var step;
+var fire;
 
 var music;
 var water;
 var possu;
 
-var level = 2;
+var level = 1;
 
 var possuOnTrue = false;
 var clothesOffTimer = -1;
@@ -89,6 +98,7 @@ var noCursorTimer = -1;
 var dyingFromOlive = false;
 
 var dieTimer = -1;
+
 
 function create() {
 
@@ -117,16 +127,18 @@ function create() {
     coin = game.add.audio('coin');
     monster = game.add.audio('monster');
     step = game.add.audio('step');
+    fire = game.add.audio('fire');
 
-    /*music = game.add.audio('music');
-    music.volume=0.5;
+    music = game.add.audio('music');
+    music.volume = 0.9;
     music.loop = true;
-    music.play();*/
+    music.play();
 
     coin.volume = 0.1;
     monster.volume = 0.7;
     step.volume = 0.5;
 
+    fire.allowMultiple = false;
     coin.allowMultiple = false;
     step.allowMultiple = false;
 
@@ -145,7 +157,6 @@ function create() {
 
     ground.scale.setTo(2, 2);
     ground.body.immovable = true;
-
 
 
     var ledge = platforms.create(500, 420, 'ground');
@@ -168,6 +179,7 @@ function create() {
     ledge.body.immovable = true;
     ledge = green_ground.create(game.world.width * 0.5, game.world.height - 88, 'green_ground');
     ledge.body.immovable = true;
+
 
     // first init player
     player = game.add.sprite(game.world.width * 0.5 - 19, game.world.height * 0.5 - 150, 'dude');
@@ -195,11 +207,9 @@ function create() {
     mustat_oliivit = game.add.group();
     mustat_oliivit.enableBody = true;
 
-
     // Keys group
     avaimet = game.add.group();
     avaimet.enableBody = true;
-
 
     // Init fireballs
     fireballs = game.add.group();
@@ -220,6 +230,7 @@ function create() {
     block.body.immovable = true;
 
 
+
     var block = blocks.create(game.world.width * 0.5 - 16, game.world.height - 160, 'block');
     block.body.immovable = true;
 
@@ -237,9 +248,11 @@ function create() {
 
     appearDiamonds();
 
+
     //
 
     props = game.add.group();
+
 
     //
 
@@ -251,8 +264,6 @@ function create() {
         fontSize: '32px',
         fill: '#000'
     });
-
-    //createFireball();
 
 }
 
@@ -306,6 +317,7 @@ function update() {
     game.physics.arcade.collide(stars, blocks);
     game.physics.arcade.collide(stars, platforms);
 
+
     // baddies get coin
     game.physics.arcade.overlap(stars, baddies, killStar, null, this);
     game.physics.arcade.overlap(stars, mustat_oliivit, killStar, null, this);
@@ -330,16 +342,37 @@ function update() {
     game.physics.arcade.collide(possu, platforms);
     game.physics.arcade.collide(fireballs, platforms);
 
+    game.physics.arcade.overlap(fireballs, player, bodyBurns, null, this);
+
     // Player, platforms and enemies.
     if (dyingFromOlive != true) {
+
         game.physics.arcade.collide(baddies, player, checkPlayerDie, null, this);
-        game.physics.arcade.collide(mustat_oliivit, player, checkPlayerDie, null, this);
+        //game.physics.arcade.collide(mustat_oliivit, player, checkPlayerDie, null, this);
+
+        // Black olive fireball
+        game.physics.arcade.collide(mustat_oliivit, player, blackOliveFireball, null, this);
+
     }
+
+    // Manage fireballs
+
+    fireballs.children.forEach(function(entry) {
+
+        entry.timeToLive--;
+
+        if (entry.timeToLive == 0) {
+            entry.kill();
+        }
+
+    });
 
 
     // Olive collision between themselves
     game.physics.arcade.collide(baddies, baddies, checkBaddieDie, null, this);
-    game.physics.arcade.collide(mustat_oliivit, baddies, checkBaddieDie, null, this);
+    game.physics.arcade.collide(baddies, mustat_oliivit, checkBaddieDie, null, this);
+
+    game.physics.arcade.collide(mustat_oliivit, mustat_oliivit, blackOliveFireball, null, this);
 
     game.physics.arcade.collide(player, platforms);
     game.physics.arcade.collide(player, blocks);
@@ -348,7 +381,6 @@ function update() {
     game.physics.arcade.collide(stars, stars);
     game.physics.arcade.overlap(player, avaimet, collectKey, null, this);
     game.physics.arcade.collide(avaimet, blocks);
-
 
     //  Finally, reset the players velocity (movement)
     player.body.velocity.x = 0;
@@ -444,8 +476,11 @@ function cleanup() {
         entry.kill();
     });
 
-    level = 1;
+    fireballs.children.forEach(function(entry) {
+        entry.kill();
+    });
 
+    level = 1;
     appearDiamonds();
 
     dyingFromOlive = false;
@@ -466,6 +501,7 @@ function appearDiamonds() {
     }
 
     var diamond = diamonds.create(game.world.width * 0.5 - 16, 50, diamondName);
+
 
     game.physics.arcade.enable(diamond);
 
@@ -490,36 +526,84 @@ function appearDiamonds() {
 
 }
 
-function createFireball(object, dir) {
+function shootFireBall(enemy, dir) {
+
+    // Don't shoot if already dying.
+    if (clothesOffTimer > 0) return;
+
+    // Reduce number of bullets
+    if (canShootFireball++ < 31) {
+        return;
+    }
+    canShootFireball = 0;
+
+
+    fire.play();
+
+    // Enemy object shoots fireball
 
     var fireball;
 
+    let posX = enemy.body.x + 25 * dir;
+    let posY = enemy.body.y + 5;
+
     if (dir < 0) {
 
-        fireball = fireballs.create(game.world.width - 10, 140, 'fireball_txt');
-
-        fireball.body.velocity.x = -300;
+        fireball = fireballs.create(posX, posY, 'fireball_txt');
+        fireball.body.velocity.x = -250;
 
     } else {
 
-        fireball = fireballs.create(10, 140, 'fireball_txt');
-        fireball.body.velocity.x = 300;
+        fireball = fireballs.create(posX, posY, 'fireball_txt');
+        fireball.body.velocity.x = 250;
 
     }
 
+    // shoot up a little
+    fireball.body.velocity.y = -30;
 
-    fireball.scale.setTo(0.7, 0.7);
+    fireball.scale.setTo(0.65, 0.65);
 
-    game.physics.arcade.enable(fireball);
+    // game.physics.arcade.enable(fireball);
 
-    fireball.body.bounce.y = 0.8;
-    fireball.body.gravity.y = 100;
+    fireball.body.bounce.y = 0.9;
+    fireball.body.gravity.y = 35;
 
     fireball.checkWorldBounds = true;
     fireball.events.onOutOfBounds.add(baddieOut, this);
 
     fireball.animations.add('spin', [0, 1, 2, 3], 20, true);
     fireball.animations.play('spin');
+
+    fireball.timeToLive = 190;
+
+}
+
+
+//
+// If player touches the Black olive,
+// is shoots a fireball.
+//
+
+function blackOliveFireball(player, olive) {
+
+    // only shoot if player is left or right
+
+    var direction;
+
+
+
+    if (olive.animations.currentAnim.name == "left") {
+
+        dir = -1;
+
+    } else if (olive.animations.currentAnim.name == "right") {
+
+        dir = 1;
+
+    }
+
+    shootFireBall(olive, dir)
 
 }
 
@@ -596,7 +680,6 @@ function checkPlayerDie(player, olive) {
     }
 }
 
-
 function dieFromGreenOlive(olive) {
 
     extraOlive = olive;
@@ -623,11 +706,12 @@ function dieFromGreenOlive(olive) {
     clothesOffTimer = -1;
 
     dieTimer = 120;
+
 }
 
-function takeClothesOff(possu, player) {
+function takeClothesOff(possu, p) {
 
-    player.loadTexture('dude_naked');
+    player.loadTexture('dude_naked'); // player global
 
     if (dyingFromOlive == false) {
         clothesOffTimer = 80;
@@ -635,6 +719,18 @@ function takeClothesOff(possu, player) {
 
     possu.animations.play('run_clothes');
     possu.body.velocity.x = 150;
+
+}
+
+function bodyBurns(possu, p) {
+
+    player.loadTexture('body_burn'); // player global
+
+    if (dyingFromOlive == false) {
+        clothesOffTimer = 90;
+    }
+
+    possu.animations.play('run_clothes');
 
 }
 
@@ -734,9 +830,12 @@ function collectDiamond(player, diamond) {
 
     }
 
+
     //  Add and update the score
+
     score += 100 * level;
     scoreText.text = 'Coins: ' + score;
+
 }
 
 function collectStar(player, star) {
@@ -767,7 +866,6 @@ function collectKey(player, key) {
 }
 
 
-
 function luoAvain() {
 
     var avain = avaimet.create(game.world.width * 0.5 - 15, game.world.height - 300, 'avain');
@@ -784,8 +882,8 @@ function luoAvain() {
 
 }
 
-
 function createBaddiesAndCoins() {
+
 
     if (baddieCounter == 240) {
 
@@ -843,8 +941,6 @@ function createBaddiesAndCoins() {
                 baddie.animations.add('left', [3, 4], 6, true);
                 baddie.body.velocity.x = 70;
 
-                createFireball(baddie, 1);
-
             }
 
             baddie.body.bounce.y = 0.3;
@@ -869,8 +965,6 @@ function createBaddiesAndCoins() {
                 baddie.animations.add('right', [0, 1], 6, true);
                 baddie.animations.add('left', [3, 4], 6, true);
                 baddie.body.velocity.x = -80;
-
-                createFireball(baddie, -1);
 
             }
 
