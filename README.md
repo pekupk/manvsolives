@@ -9,12 +9,12 @@ The testing server is a nodejs Hapi web server.
 #Install:
 > npm install
 
-#Run:
+## Run:
 > node index.js
 
 Then go to http://localhost:8080
 
-#Game files:
+## Game files:
 
 Currently, the game is just one file: ./js/game.js
 Assets are in ./assets
