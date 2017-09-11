@@ -14,8 +14,7 @@ Then go to http://localhost:8080
 
 ## Game files:
 
-Currently, the game is just one file: ./js/game.js
-Assets are in ./assets
+Currently, the game is just one file located at ./js/game.js
 
 ## Testing and development server
 
@@ -24,5 +23,6 @@ The testing server is a nodejs Hapi web server (c.f., index.js). The server serv
 ## Assets
 
 Graphical assets are currently .png, .mp3 and .m4a files.
+All assets are in ./assets.
 
 
