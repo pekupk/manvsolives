@@ -21,8 +21,13 @@ function preload() {
     game.load.spritesheet('waters', 'assets/waters.png', 32, 400, 32);
     game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
 
-    game.load.spritesheet('baddie2', 'assets/olive_black.png', 32, 32);
+    game.load.spritesheet('baddie2', 'assets/b_olive_trim.png', 32, 29);
+
+    game.load.spritesheet('baddie3', 'assets/k_olive.png', 40, 41); // Kalamata olive
+
     game.load.spritesheet('possu', 'assets/possu2.png', 32, 24);
+
+    //game.load.spritesheet('possu', 'assets/ihleijona.png', 128, 64);
 
     game.load.spritesheet('avain', 'assets/avain.png', 32, 32);
 
@@ -88,7 +93,7 @@ var music;
 var water;
 var possu;
 
-var level = 2;
+var level = 1;
 
 var possuOnTrue = false;
 var clothesOffTimer = -1;
@@ -947,11 +952,18 @@ function createBaddiesAndCoins() {
                 baddie.animations.add('left', [2, 3], 1, true);
                 baddie.body.velocity.x = 60;
 
-            } else {
+            } else if (level == 2) {
 
                 baddie = mustat_oliivit.create(game.world.width * 0.5 - 32 + 50, -32, 'baddie2');
                 baddie.animations.add('right', [0, 1], 6, true);
                 baddie.animations.add('left', [3, 4], 6, true);
+                baddie.body.velocity.x = 70;
+
+            } else {
+
+                baddie = mustat_oliivit.create(game.world.width * 0.5 - 32 + 50, -32, 'baddie3');
+                baddie.animations.add('right', [0, 1], 6, true);
+                baddie.animations.add('left', [2, 3], 6, true);
                 baddie.body.velocity.x = 70;
 
             }
@@ -972,11 +984,18 @@ function createBaddiesAndCoins() {
                 baddie.animations.add('left', [2, 3], 1, true);
                 baddie.body.velocity.x = -60;
 
-            } else {
+            } else if (level == 2) {
 
                 baddie = mustat_oliivit.create(game.world.width * 0.5 - 32 - 50, -32, 'baddie2');
                 baddie.animations.add('right', [0, 1], 6, true);
                 baddie.animations.add('left', [3, 4], 6, true);
+                baddie.body.velocity.x = -80;
+
+            } else {
+
+                baddie = mustat_oliivit.create(game.world.width * 0.5 - 32 - 50, -32, 'baddie3');
+                baddie.animations.add('right', [0, 1], 6, true);
+                baddie.animations.add('left', [2, 3], 6, true);
                 baddie.body.velocity.x = -80;
 
             }
@@ -990,8 +1009,8 @@ function createBaddiesAndCoins() {
 
         }
 
-
-        baddie.bulletLimiter = 0;
+        // Shoots at 31 -> 6 frames delay first shot
+        baddie.bulletLimiter = 25;
         baddie.baddieid = baddieId++;
 
         monster.play();
