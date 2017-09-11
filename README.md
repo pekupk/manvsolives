@@ -28,3 +28,12 @@ All assets are in ./assets.
 ## Contributing
 
 Contributions for the game are welcome in all areas and aspects of game development.
+
+Possibilities:
+
+1) Fork & pull request
+2) Join as contributor – code / graphics / music
+3) PM me here, on Twitter or somewhere and we'll go from there.
+
+best regards,
+pk
