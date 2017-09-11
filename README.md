@@ -1,19 +1,21 @@
-# manvsolives
+# Man versus Olives
 Phaser HTML5 Game
 
 Comes with nodejs dev server (index.js file)
 
 The testing server is a nodejs Hapi web server.
 
-To run the testing server.
-Install: > npm install
-Run: > node index.js
+# To run the testing server.
+#Install:
+> npm install
+#Run:
+> node index.js
 
 Then go to http://localhost:8080
 
-Game files:
+#Game files:
 
-Currently, the game is one file: ./js/game.js
+Currently, the game is just one file: ./js/game.js
 Assets are in ./assets
 
 Radioactive olives have taken over a farm somewhere over at the mediterranean sea. Farmer-boy Pedro is caught up in the midst of this havoc. Can he collect the gems and rescue his farm?
