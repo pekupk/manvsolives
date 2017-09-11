@@ -18,7 +18,7 @@ Currently, the game is just one file located at ./js/game.js
 
 ## Testing and development server
 
-The testing server is a nodejs Hapi web server (c.f., index.js & package.json). The server serves a static web page part1.html where the game is embedded. It also serves the routes for javascript files and the assets files.
+The testing server is a nodejs Hapi web server (c.f., index.js & package.json). The server serves a static web page part1.html where the game is embedded. It also serves the routes for both javascript files and assets files.
 
 ## Assets
 
