@@ -6,7 +6,7 @@ Comes with nodejs dev server (index.js file)
 The testing server is a nodejs Hapi web server.
 
 # To run the testing server.
-#Install:
+## Install:
 > npm install
 
 ## Run:
