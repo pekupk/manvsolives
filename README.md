@@ -25,3 +25,6 @@ The testing server is a nodejs Hapi web server (c.f., index.js & package.json). 
 Graphical assets are currently .png, .mp3 and .m4a files.
 All assets are in ./assets.
 
+## Contributing
+
+Contributions for the game are welcome in all areas and aspects of game development.
