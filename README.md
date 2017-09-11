@@ -8,6 +8,7 @@ The testing server is a nodejs Hapi web server.
 # To run the testing server.
 #Install:
 > npm install
+
 #Run:
 > node index.js
 
