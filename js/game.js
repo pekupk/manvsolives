@@ -45,7 +45,7 @@ function preload() {
 
     game.load.audio('music', 'assets/music.m4a');
 
-    //game.load.audio('music', 'assets/vv.mp3');
+    game.load.audio('music2', 'assets/vv.mp3');
 
     //game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
 
@@ -90,6 +90,8 @@ var step;
 var fire;
 
 var music;
+var music2;
+
 var water;
 var possu;
 
@@ -138,6 +140,7 @@ function create() {
     music.loop = true;
     music.play();
 
+
     coin.volume = 0.1;
     monster.volume = 0.7;
     step.volume = 0.5;
@@ -152,37 +155,43 @@ function create() {
     green_ground = game.add.group();
     green_ground.enableBody = true;
 
+    green_groundBG = game.add.group();
+    green_groundBG.enableBody = true;
+
     blocks = game.add.group();
     blocks.enableBody = true;
 
 
     // Build platforms.
-    var ground = platforms.create(0, game.world.height - 64, 'green_ground');
+    var ground = green_ground.create(0, game.world.height - 64, 'green_ground');
 
     ground.scale.setTo(2, 2);
     ground.body.immovable = true;
 
 
+    ledge = green_groundBG.create(0, game.world.height - 88, 'green_ground');
+    ledge.body.immovable = true;
+    ledge = green_groundBG.create(game.world.width * 0.5, game.world.height - 88, 'green_ground');
+    ledge.body.immovable = true;
+
+
     var ledge = platforms.create(500, 420, 'ground');
     ledge.body.immovable = true;
 
-    ledge = platforms.create(-100, 420, 'ground');
-    ledge.body.immovable = true;
+    var ledge2 = platforms.create(-100, 420, 'ground');
+    ledge2.body.immovable = true;
 
-    ledge = platforms.create(585, 260, 'ground');
-    ledge.body.immovable = true;
+    var ledge3 = platforms.create(585, 260, 'ground');
+    ledge3.body.immovable = true;
 
-    ledge = platforms.create(-185, 260, 'ground');
-    ledge.body.immovable = true;
+    var ledge4 = platforms.create(-185, 260, 'ground');
+    ledge4.body.immovable = true;
 
-    ledge = platforms.create(200, 100, 'ground');
-    ledge.body.immovable = true;
+    var ledge5 = platforms.create(200, 100, 'ground');
+    ledge5.body.immovable = true;
 
 
-    ledge = green_ground.create(0, game.world.height - 88, 'green_ground');
-    ledge.body.immovable = true;
-    ledge = green_ground.create(game.world.width * 0.5, game.world.height - 88, 'green_ground');
-    ledge.body.immovable = true;
+
 
 
     // first init player
@@ -220,31 +229,38 @@ function create() {
     fireballs.enableBody = true;
 
 
-    //Init blocks
+
+
+    //Init the blocks
     var block = blocks.create(0, 230, 'block');
     block.body.immovable = true;
 
-    var block = blocks.create(game.world.width - 32, 230, 'block');
-    block.body.immovable = true;
+    var block2 = blocks.create(game.world.width - 32, 230, 'block');
+    block2.body.immovable = true;
 
-    var block = blocks.create(0, 390, 'block');
-    block.body.immovable = true;
+    var block3 = blocks.create(0, 390, 'block');
+    block3.body.immovable = true;
 
-    var block = blocks.create(game.world.width - 32, 390, 'block');
-    block.body.immovable = true;
+    var block4 = blocks.create(game.world.width - 32, 390, 'block');
+    block4.body.immovable = true;
+
+
+    var block5 = blocks.create(game.world.width * 0.5 - 16, game.world.height - 160, 'block');
+    block5.body.immovable = true;
+
+    var block6 = blocks.create(game.world.width * 0.38 - 16, game.world.height - 365, 'block');
+    block6.body.immovable = true;
+
+    var block7 = blocks.create(game.world.width * 0.62 - 16, game.world.height - 365, 'block');
+    block7.body.immovable = true;
 
 
 
-    var block = blocks.create(game.world.width * 0.5 - 16, game.world.height - 160, 'block');
-    block.body.immovable = true;
-
-    var block = blocks.create(game.world.width * 0.38 - 16, game.world.height - 365, 'block');
-    block.body.immovable = true;
-
-    var block = blocks.create(game.world.width * 0.62 - 16, game.world.height - 365, 'block');
-    block.body.immovable = true;
-
+    // cursors
     cursors = game.input.keyboard.createCursorKeys();
+
+
+
 
 
     diamonds = game.add.group();
@@ -256,7 +272,6 @@ function create() {
     //
 
     props = game.add.group();
-
 
     //
 
@@ -271,7 +286,90 @@ function create() {
 
 }
 
-function update() {
+function playerMovement() {
+
+    // Initially, reset player movement.
+    player.body.velocity.x = 0;
+
+    // check if we have movement
+    if (noCursorTimer > 0) {
+
+        noCursorTimer -= 1;
+
+        //  Meanwhile, stand still
+        player.animations.stop();
+        player.frame = 4;
+
+        return;
+
+    }
+
+
+    // handle dying from green olive
+    if (dyingFromOlive == true) {
+
+        //  Stand still
+        player.animations.stop();
+        player.frame = 4;
+
+        player.body.velocity.x = 0;
+        player.body.velocity.y = 0;
+
+
+        if (cursors.left.isDown) {
+
+            extraOlive.frame = 3;
+
+        } else if (cursors.right.isDown) {
+
+            extraOlive.frame = 0;
+        }
+
+        return;
+    }
+
+    if (cursors.left.isDown) {
+
+        //  Move to the left
+        player.body.velocity.x = -180;
+
+        player.animations.play('left');
+
+    } else if (cursors.right.isDown) {
+        //  Move to the right
+        player.body.velocity.x = 180;
+
+        player.animations.play('right');
+
+    } else {
+        //  Stand still
+        player.animations.stop();
+
+        player.frame = 4;
+    }
+
+    //  Allow the player to jump if they are touching the ground.
+    if (cursors.up.isDown && player.body.touching.down) {
+        player.body.velocity.y = -300;
+    }
+
+
+}
+
+// End monster level.
+function endMonster() {
+
+    game.physics.arcade.collide(player, platforms);
+    game.physics.arcade.collide(player, blocks);
+    game.physics.arcade.collide(player, green_ground);
+
+
+    // handle player movement
+    playerMovement()
+}
+
+// Basic levels
+function levels1to3() {
 
     if (clothesOffTimer > 0) {
 
@@ -307,9 +405,11 @@ function update() {
     // Collitions
     // baddies collitions with blocks and platforms
     game.physics.arcade.collide(baddies, platforms);
+    game.physics.arcade.collide(baddies, green_ground);
     game.physics.arcade.collide(baddies, blocks, collideBlock, null, this);
 
     game.physics.arcade.collide(mustat_oliivit, platforms);
+    game.physics.arcade.collide(mustat_oliivit, green_ground);
     game.physics.arcade.collide(mustat_oliivit, blocks, collideBlock, null, this);
     //game.physics.arcade.collide(baddies, baddies);
 
@@ -317,9 +417,11 @@ function update() {
     // Money and diamonds
     game.physics.arcade.overlap(player, stars, collectStar, null, this);
     game.physics.arcade.overlap(player, diamonds, collectDiamond, null, this);
+
     game.physics.arcade.collide(stars, stars);
     game.physics.arcade.collide(stars, blocks);
     game.physics.arcade.collide(stars, platforms);
+    game.physics.arcade.collide(stars, green_ground);
 
 
     // baddies get coin
@@ -331,8 +433,8 @@ function update() {
 
 
     // Pork collitions and apparitions
-    game.physics.arcade.overlap(green_ground, baddies, luoPossu, null, this);
-    game.physics.arcade.overlap(green_ground, mustat_oliivit, luoPossu, null, this);
+    game.physics.arcade.overlap(green_groundBG, baddies, luoPossu, null, this);
+    game.physics.arcade.overlap(green_groundBG, mustat_oliivit, luoPossu, null, this);
 
     if (possuOnTrue) {
 
@@ -344,6 +446,8 @@ function update() {
     }
 
     game.physics.arcade.collide(possu, platforms);
+    game.physics.arcade.collide(possu, green_ground);
+
     game.physics.arcade.collide(fireballs, platforms);
 
     game.physics.arcade.overlap(fireballs, player, bodyBurns, null, this);
@@ -382,6 +486,7 @@ function update() {
     game.physics.arcade.collide(mustat_oliivit, mustat_oliivit, blackOliveFireball, null, this);
 
     game.physics.arcade.collide(player, platforms);
+    game.physics.arcade.collide(player, green_ground);
     game.physics.arcade.collide(player, blocks);
 
     // coins and keys
@@ -389,68 +494,22 @@ function update() {
     game.physics.arcade.overlap(player, avaimet, collectKey, null, this);
     game.physics.arcade.collide(avaimet, blocks);
 
-    //  Finally, reset the players velocity (movement)
-    player.body.velocity.x = 0;
-
-    if (dyingFromOlive == true) {
-
-        //  Stand still
-        player.animations.stop();
-        player.frame = 4;
-
-        player.body.velocity.x = 0;
-        player.body.velocity.y = 0;
 
 
-        if (cursors.left.isDown) {
+    // handle player movement
+    playerMovement()
 
-            extraOlive.frame = 3;
+}
 
-        } else if (cursors.right.isDown) {
+function update() {
 
-            extraOlive.frame = 0;
-        }
 
-        return;
-    }
-
-    // check if we have movement
-    if (noCursorTimer > 0) {
-
-        noCursorTimer -= 1;
-
-        //  Meanwhile, stand still
-        player.animations.stop();
-        player.frame = 4;
-
-        return;
-
-    }
-
-    if (cursors.left.isDown) {
-
-        //  Move to the left
-        player.body.velocity.x = -180;
-
-        player.animations.play('left');
-
-    } else if (cursors.right.isDown) {
-        //  Move to the right
-        player.body.velocity.x = 180;
-
-        player.animations.play('right');
-
+    if (level < 4) {
+        levels1to3()
     } else {
-        //  Stand still
-        player.animations.stop();
-
-        player.frame = 4;
+        endMonster()
     }
 
-    //  Allow the player to jump if they are touching the ground.
-    if (cursors.up.isDown && player.body.touching.down) {
-        player.body.velocity.y = -300;
-    }
 
 } // End of game loop.
 
@@ -487,8 +546,34 @@ function cleanup() {
         entry.kill();
     });
 
-    level = 1;
-    appearDiamonds();
+    if (level > 3) {
+
+        // cleanup & setup for end monster
+
+        blocks.children.forEach(function(e) {
+            e.kill()
+        })
+
+        platforms.children.forEach(function(e) {
+            e.kill()
+        })
+
+        // reset to basic texture
+        player.loadTexture('dude')
+
+        music.stop()
+
+        music2 = game.add.audio('music2');
+        music2.volume = 0.9;
+        music2.loop = true;
+
+        music2.play()
+
+    } else {
+
+        level = 1;
+        appearDiamonds();
+    }
 
     dyingFromOlive = false;
 
@@ -872,14 +957,22 @@ function collectKey(player, key) {
 
     key.kill();
 
-    // put key to scoreboard.
-    if (level < 4) {
-        var gottenKey = props.create(game.world.width - 117 + level * 25, 15, 'avain');
-    }
-
     level++;
 
-    appearDiamonds();
+    // put key to scoreboard.
+    if (level < 4) {
+
+        var gottenKey = props.create(game.world.width - 117 + level * 25, 15, 'avain');
+
+        appearDiamonds();
+
+    } else { // level 4 end monster
+
+        console.log("End monster!")
+
+        cleanup()
+
+    }
 
 }
 
