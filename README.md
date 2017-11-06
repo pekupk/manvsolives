@@ -1,7 +1,7 @@
 # Man versus Olives
 HTML5 Game implemented with phaser.io
 
-Radioactive olives have taken over a farm somewhere over at the mediterranean sea. Farmer-boy Pedro is caught up in the midst of this havoc. Can he collect the gems and rescue his farm?
+Radioactive olives have taken over a farm somewhere over at the mediterranean sea. Farmer-man Pedro is caught up in the midst of this havoc. Can he collect the gems and rescue his farm?
 
 ## Running the testing and development server
 ## Install:

@@ -40,12 +40,12 @@ function preload() {
 
     game.load.audio('coin', 'assets/coin.mp3');
     game.load.audio('monster', 'assets/monster.mp3');
-
     game.load.audio('fire', 'assets/fire.m4a');
-
     game.load.audio('music', 'assets/music.m4a');
-
     game.load.audio('music2', 'assets/vv.mp3');
+
+    //game.load.spritesheet('oak', 'assets/oak.png')
+    game.load.spritesheet('ufo_dot', 'assets/ufo_dot.png')
 
     //game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
 
@@ -70,6 +70,9 @@ var baddies;
 var mustat_oliivit;
 
 var fireballs;
+
+//
+var ufoDots;
 
 var baddieCounter = 0;
 
@@ -244,7 +247,6 @@ function create() {
     var block4 = blocks.create(game.world.width - 32, 390, 'block');
     block4.body.immovable = true;
 
-
     var block5 = blocks.create(game.world.width * 0.5 - 16, game.world.height - 160, 'block');
     block5.body.immovable = true;
 
@@ -258,9 +260,6 @@ function create() {
 
     // cursors
     cursors = game.input.keyboard.createCursorKeys();
-
-
-
 
 
     diamonds = game.add.group();
@@ -283,6 +282,11 @@ function create() {
         fontSize: '32px',
         fill: '#000'
     });
+
+
+    // Test end scene 1
+    /*level = 4;
+    setupEndMonster1()*/
 
 }
 
@@ -356,12 +360,27 @@ function playerMovement() {
 
 }
 
+var p = 0.0
+
 // End monster level.
 function endMonster() {
 
     game.physics.arcade.collide(player, platforms);
     game.physics.arcade.collide(player, blocks);
     game.physics.arcade.collide(player, green_ground);
+
+
+    var phase = 0.0
+
+    p += 0.01
+
+    // 1st phase
+    ufoDots.children.forEach(function(e) {
+        phase += 3.141 / ufoDots.children.length;
+
+        e.x = Math.sin(2 * p + phase) * game.world.width * 0.4 + game.world.width * 0.5;
+        e.y = Math.cos(3 * p + phase) * game.world.height * 0.4 + game.world.width * 0.3;
+    })
 
 
     // handle player movement
@@ -494,8 +513,6 @@ function levels1to3() {
     game.physics.arcade.overlap(player, avaimet, collectKey, null, this);
     game.physics.arcade.collide(avaimet, blocks);
 
-
-
     // handle player movement
     playerMovement()
 
@@ -513,6 +530,38 @@ function update() {
 
 } // End of game loop.
 
+
+// setup for end monster 1
+
+function setupEndMonster1() {
+
+    ufoDots = game.add.group();
+    //var star = stars.create(game.world.width + 8, 280, 'star');
+
+    for (i = 0; i < 4; i++) {
+        ufoDots.create(game.world.width * 0.5, game.world.height * 0.5, 'ufo_dot')
+    }
+
+    blocks.children.forEach(function(e) {
+        e.kill()
+    })
+
+    platforms.children.forEach(function(e) {
+        e.kill()
+    })
+
+    // reset to basic texture
+    player.loadTexture('dude')
+
+    music.stop()
+
+    music2 = game.add.audio('music2');
+    music2.volume = 0.9;
+    music2.loop = true;
+
+    music2.play()
+
+}
 
 // Utility methods:
 
@@ -550,24 +599,7 @@ function cleanup() {
 
         // cleanup & setup for end monster
 
-        blocks.children.forEach(function(e) {
-            e.kill()
-        })
-
-        platforms.children.forEach(function(e) {
-            e.kill()
-        })
-
-        // reset to basic texture
-        player.loadTexture('dude')
-
-        music.stop()
-
-        music2 = game.add.audio('music2');
-        music2.volume = 0.9;
-        music2.loop = true;
-
-        music2.play()
+        setupEndMonster1()
 
     } else {
 
@@ -723,7 +755,6 @@ function luoPossu(a, b) {
     possu.body.velocity.x = 280;
 
     possu.checkWorldBounds = true;
-
     possu.events.onOutOfBounds.add(possuOut, this);
 
     possu.animations.play('run');
