@@ -361,6 +361,14 @@ function playerMovement() {
 }
 
 var p = 0.0
+var p2 = 0.0
+
+var ufoDotCounter = 0
+var stopAndShootCounter = 0
+
+var nextShoot = 292
+
+var incrementer = 0.008
 
 // End monster level.
 function endMonster() {
@@ -370,16 +378,40 @@ function endMonster() {
     game.physics.arcade.collide(player, green_ground);
 
 
-    var phase = 0.0
+    if (ufoDotCounter++ > nextShoot) {
 
-    p += 0.01
+        stopAndShootCounter++;
+
+        if (stopAndShootCounter > 100) {
+
+            incrementer *= -1
+            ufoDotCounter = 0;
+            stopAndShootCounter = 0;
+
+            nextShoot = 784
+        }
+
+
+    } else {
+
+        p += incrementer
+
+    }
+
+
+    p2 += incrementer
+
+    var phase = 0
+
 
     // 1st phase
     ufoDots.children.forEach(function(e) {
-        phase += 3.141 / ufoDots.children.length;
 
-        e.x = Math.sin(2 * p + phase) * game.world.width * 0.4 + game.world.width * 0.5;
-        e.y = Math.cos(3 * p + phase) * game.world.height * 0.4 + game.world.width * 0.3;
+        phase += 1.2 / ufoDots.children.length;
+
+        e.x = Math.sin(2 * (p + phase)) * game.world.width * 0.4 + game.world.width * 0.5;
+        e.y = Math.cos(3 * (p + phase)) * game.world.height * 0.4 + game.world.height * 0.4;
+
     })
 
 
@@ -536,9 +568,8 @@ function update() {
 function setupEndMonster1() {
 
     ufoDots = game.add.group();
-    //var star = stars.create(game.world.width + 8, 280, 'star');
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 3; i++) {
         ufoDots.create(game.world.width * 0.5, game.world.height * 0.5, 'ufo_dot')
     }
 
