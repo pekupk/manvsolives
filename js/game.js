@@ -47,6 +47,8 @@ function preload() {
     //game.load.spritesheet('oak', 'assets/oak.png')
     game.load.spritesheet('ufo_dot', 'assets/ufo_dot.png')
 
+    game.load.spritesheet('missile', 'assets/missile.png')
+
     //game.load.spritesheet('rain', 'assets/rain.png', 17, 17);
 
 }
@@ -71,9 +73,11 @@ var mustat_oliivit;
 
 var fireballs;
 
-//
+// end scene 1
 var ufoDots;
+var missiles;
 
+//
 var baddieCounter = 0;
 
 var props;
@@ -308,7 +312,6 @@ function playerMovement() {
 
     }
 
-
     // handle dying from green olive
     if (dyingFromOlive == true) {
 
@@ -340,12 +343,14 @@ function playerMovement() {
         player.animations.play('left');
 
     } else if (cursors.right.isDown) {
+
         //  Move to the right
         player.body.velocity.x = 180;
 
         player.animations.play('right');
 
     } else {
+
         //  Stand still
         player.animations.stop();
 
@@ -361,32 +366,116 @@ function playerMovement() {
 }
 
 var p = 0.0
-var p2 = 0.0
 
 var ufoDotCounter = 0
 var stopAndShootCounter = 0
+var willShootCounter = 0
 
 var nextShoot = 292
 
 var incrementer = 0.008
 
-// End monster level.
+// End scene 1 missile shooter
+function shootMissile(ufo) {
+
+    for (var i = 0; i < 2; i++) {
+        var missile = missiles.create(ufo.centerX, ufo.centerY, 'missile')
+        missile.centerX = ufo.centerX
+        missile.centerY = ufo.centerY
+
+        game.physics.arcade.enable(missile);
+
+        missile.body.allowGravity = false
+
+        missile.body.mass = 5
+        missile.body.maxVelocity.x = 720
+        missile.body.maxVelocity.y = 720
+
+        missile.body.allowGravity = false
+
+        missile.seekTime = 170
+        missile.launchTime = 50
+
+        missile.checkWorldBounds = true;
+        missile.events.onOutOfBounds.add(possuOut, this);
+
+        if (i == 0) {
+            missile.body.velocity.x = -100
+
+        } else if (i == 1) {
+            missile.body.velocity.x = 100
+
+        }
+
+    }
+
+}
+
+// End scene 1 game loop
 function endMonster() {
 
     game.physics.arcade.collide(player, platforms);
     game.physics.arcade.collide(player, blocks);
     game.physics.arcade.collide(player, green_ground);
+    game.physics.arcade.collide(player, ufoDots);
+
+    game.physics.arcade.overlap(missiles, green_ground, killStar, null, this);
+
+    game.physics.arcade.overlap(missiles, player, takeClothesOff, null, this);
+
+    // handle missiles
+    missiles.children.forEach(function(m) {
+
+        // seek player
+        m.launchTime--;
+        m.seekTime--;
+
+        if (m.launchTime == 0) {
+            m.body.velocity.x = 0
+        }
+
+        if (m.seekTime > 0 && m.launchTime < 0) {
+
+            // seek towards player.
+
+            var ax = player.centerX - m.centerX
+            var ay = player.centerY - m.centerY
+
+            //truncate acceleration
+            var l_t = Math.sqrt(ax * ax + ay * ay) / 300.0
+            ax = ax / l_t
+            ay = ay / l_t
+
+            m.body.acceleration.x = ax
+            m.body.acceleration.y = ay
+        }
+
+    })
 
 
     if (ufoDotCounter++ > nextShoot) {
 
         stopAndShootCounter++;
 
-        if (stopAndShootCounter > 100) {
+
+        if (willShootCounter++ > 50) {
+
+            monster.play();
+
+            ufoDots.children.forEach(function(e) {
+                shootMissile(e)
+                willShootCounter = 0
+            })
+        }
+
+        if (stopAndShootCounter > 200) {
+
+
 
             incrementer *= -1
             ufoDotCounter = 0;
             stopAndShootCounter = 0;
+            willShootCounter = 0;
 
             nextShoot = 784
         }
@@ -397,9 +486,6 @@ function endMonster() {
         p += incrementer
 
     }
-
-
-    p2 += incrementer
 
     var phase = 0
 
@@ -568,9 +654,10 @@ function update() {
 function setupEndMonster1() {
 
     ufoDots = game.add.group();
+    missiles = game.add.group();
 
     for (i = 0; i < 3; i++) {
-        ufoDots.create(game.world.width * 0.5, game.world.height * 0.5, 'ufo_dot')
+        ufoDots.create(game.world.width * 0.5, game.world.height * 0.5, 'ufo_dot');
     }
 
     blocks.children.forEach(function(e) {
@@ -578,6 +665,10 @@ function setupEndMonster1() {
     })
 
     platforms.children.forEach(function(e) {
+        e.kill()
+    })
+
+    diamonds.children.forEach(function(e) {
         e.kill()
     })
 
