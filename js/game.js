@@ -289,8 +289,8 @@ function create() {
 
 
     // Test end scene 1
-    /*level = 4;
-    setupEndMonster1()*/
+    level = 4;
+    setupEndMonster1()
 
 }
 
