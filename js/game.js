@@ -21,11 +21,14 @@ function preload() {
     game.load.spritesheet('waters', 'assets/waters.png', 32, 400, 32);
     game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
 
+    game.load.spritesheet('red_olive', 'assets/red_olives.png', 128, 64);
+    game.load.spritesheet('red_olive_queen', 'assets/red_olives_queen.png', 128, 64);
+
     game.load.spritesheet('baddie2', 'assets/b_olive_trim.png', 32, 29);
 
     game.load.spritesheet('baddie3', 'assets/k_olive.png', 40, 41); // Kalamata olive
-
     game.load.spritesheet('possu', 'assets/possu2.png', 32, 24);
+
 
     //game.load.spritesheet('possu', 'assets/ihleijona.png', 128, 64);
 
@@ -379,17 +382,15 @@ var incrementer = 0.008
 function shootMissile(ufo) {
 
     for (var i = 0; i < 2; i++) {
-        var missile = missiles.create(ufo.centerX, ufo.centerY, 'missile')
+        var missile = missiles.create(ufo.centerX, ufo.centerY, 'ufo_dot')
         missile.centerX = ufo.centerX
         missile.centerY = ufo.centerY
 
         game.physics.arcade.enable(missile);
 
-        missile.body.allowGravity = false
-
         missile.body.mass = 5
-        missile.body.maxVelocity.x = 720
-        missile.body.maxVelocity.y = 720
+        missile.body.maxVelocity.x = 420 // hyvä arvo, testattu 
+        missile.body.maxVelocity.y = 420
 
         missile.body.allowGravity = false
 
@@ -458,7 +459,7 @@ function endMonster() {
         stopAndShootCounter++;
 
 
-        if (willShootCounter++ > 50) {
+        if (willShootCounter++ > 51) {
 
             monster.play();
 
@@ -495,8 +496,8 @@ function endMonster() {
 
         phase += 1.2 / ufoDots.children.length;
 
-        e.x = Math.sin(2 * (p + phase)) * game.world.width * 0.4 + game.world.width * 0.5;
-        e.y = Math.cos(3 * (p + phase)) * game.world.height * 0.4 + game.world.height * 0.4;
+        e.centerX = Math.sin(2 * (p + phase)) * game.world.width * 0.4 + game.world.width * 0.5;
+        e.centerY = Math.cos(3 * (p + phase)) * game.world.height * 0.4 + game.world.height * 0.5;
 
     })
 
@@ -657,7 +658,18 @@ function setupEndMonster1() {
     missiles = game.add.group();
 
     for (i = 0; i < 3; i++) {
-        ufoDots.create(game.world.width * 0.5, game.world.height * 0.5, 'ufo_dot');
+
+        var redOlive
+
+        if (i != 1) {
+            redOlive = ufoDots.create(game.world.width * 0.5, game.world.height * 0.5, 'red_olive');
+        } else {
+            redOlive = ufoDots.create(game.world.width * 0.5, game.world.height * 0.5, 'red_olive_queen');
+        }
+
+
+        redOlive.animations.add('fly', [0, 1, 2, 3], 5, true);
+        redOlive.animations.play('fly');
     }
 
     blocks.children.forEach(function(e) {
@@ -681,7 +693,7 @@ function setupEndMonster1() {
     music2.volume = 0.9;
     music2.loop = true;
 
-    music2.play()
+    //music2.play()
 
 }
 
@@ -996,7 +1008,6 @@ function putClothesOn() {
 
 }
 
-
 function checkBaddieDie(b1, baddie) {
 
     if (b1.body.touching.up) {
@@ -1004,7 +1015,6 @@ function checkBaddieDie(b1, baddie) {
         b1.kill();
     }
 }
-
 
 function checkBaddieDiePossu(possu, baddie) {
 
